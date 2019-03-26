@@ -1,0 +1,12 @@
+
+build/default/debug/
+
+dist/default/debug/
+
+nbproject/
+
+dist/default/production/
+
+build/default/production/
+
+Makefile
