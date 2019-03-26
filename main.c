@@ -12,6 +12,7 @@
 #include <pic18f4331.h>
 #include <stdio.h>
 
+#include "seven-segment.h"
 #include "leds.h"
         void init(){
           TRISBbits.RB0 = 0;
@@ -22,18 +23,20 @@
           TRISBbits.TRISB1 = 0;
           TRISBbits.TRISB2 = 0;
           TRISBbits.TRISB3 = 0;
-       
-       }                           
+
+    init_seven_segment();
+}                           
                 /* ****************** MAIN ****************** */
 
       void main(void){
           init();
           blink_leds();
-          while (1){
-//              on_low();
+    while (1){        
+        test_all();
               moving_leds();
         CLRWDT();
+    }
            
-        }
+}
         
 
