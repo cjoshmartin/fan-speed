@@ -32,7 +32,7 @@
           while (1){
 //              on_low();
               moving_leds();
-          }
+        CLRWDT();
            
         }
         

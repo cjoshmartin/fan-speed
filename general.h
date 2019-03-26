@@ -25,7 +25,7 @@ extern "C" {
 // BORV = No Setting
 
 // CONFIG2H
-#pragma config WDTEN = OFF       // Watchdog Timer Enable bit (WDT enabled)
+#pragma config WDTEN = ON       // Watchdog Timer Enable bit (WDT enabled)
 #pragma config WDPS = 32768     // Watchdog Timer Postscale Select bits (1:32768)
 #pragma config WINEN = OFF      // Watchdog Timer Window Enable bit (WDT window disabled)
 
@@ -40,7 +40,7 @@ extern "C" {
 #pragma config SSPMX = RC7      // SSP I/O MUX bit (SCK/SCL clocks and SDA/SDI data are multiplexed with RC5 and RC4, respectively. SDO output is multiplexed with RC7.)
 #pragma config PWM4MX = RB5     // PWM4 MUX bit (PWM4 output is multiplexed with RB5)
 #pragma config EXCLKMX = RC3    // TMR0/T5CKI External clock MUX bit (TMR0/T5CKI external clock input is multiplexed with RC3)
-#pragma config MCLRE = OFF       // MCLR Pin Enable bit (Enabled)
+#pragma config MCLRE = ON       // MCLR Pin Enable bit (Enabled)
 
 // CONFIG4L
 #pragma config STVREN = ON      // Stack Full/Underflow Reset Enable bit (Stack full/underflow will cause Reset)
