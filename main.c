@@ -14,6 +14,13 @@
 
 #include "seven-segment.h"
 #include "leds.h"
+void init_interrupts(){
+    //https://openlabpro.com/guide/interrupt-handling-in-pic18f4550/
+
+    INTCON.GIE = 1; 
+    INTCON.IPEN = 0;
+}
+
         void init(){
           TRISBbits.RB0 = 0;
           TRISBbits.RB1 = 0;
@@ -24,8 +31,13 @@
           TRISBbits.TRISB2 = 0;
           TRISBbits.TRISB3 = 0;
 
+    init_interrupts();
     init_seven_segment();
-}                           
+}
+        void init_interrupts(){
+        
+        
+        }
                 /* ****************** MAIN ****************** */
 
       void main(void){
