@@ -16,12 +16,40 @@
 #include "leds.h"
 unsigned char counter=0;//Overflow counter
 
+void clear_leds(){
+ PORTBbits.RB0 =0; 
+ PORTBbits.RB1 =0; 
+ PORTBbits.RB2 =0; 
+ PORTBbits.RB3 =0; 
+}
 // interrupt address is 0x08
 __interrupt() void ISR(void){ 
     // https://www.electronicwings.com/pic/pic18f4550-timer
     //    if(TMR0IE && TMR0IF){
     TMR1=0xF856;
-    PORTBbits.RB0 = ~PORTBbits.RB0;
+
+    clear_leds();
+
+    switch(counter){
+        case 0: 
+             PORTBbits.RB0 = 1; 
+             break;
+        case 1: 
+             PORTBbits.RB1 = 1; 
+             break;
+        case 2: 
+             PORTBbits.RB2 = 1; 
+             break;
+        case 3: 
+             PORTBbits.RB3 = 1; 
+             break;
+    }
+    
+    counter++;
+
+    if(counter > 3)
+        counter = 0;
+
     PIR1bits.TMR1IF=0;  /* Make Timer1 Overflow Flag to '0' */
     //    }
 }
