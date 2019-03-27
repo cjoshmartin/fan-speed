@@ -21,34 +21,30 @@ void init_interrupts(){
     INTCON.IPEN = 0;
 }
 
-        void init(){
-          TRISBbits.RB0 = 0;
-          TRISBbits.RB1 = 0;
-          TRISBbits.RB2 = 0;
-          TRISBbits.RB3 = 0;
-          TRISBbits.TRISB0 = 0;
-          TRISBbits.TRISB1 = 0;
-          TRISBbits.TRISB2 = 0;
-          TRISBbits.TRISB3 = 0;
+void init(){
+    TRISBbits.RB0 = 0;
+    TRISBbits.RB1 = 0;
+    TRISBbits.RB2 = 0;
+    TRISBbits.RB3 = 0;
+    TRISBbits.TRISB0 = 0;
+    TRISBbits.TRISB1 = 0;
+    TRISBbits.TRISB2 = 0;
+    TRISBbits.TRISB3 = 0;
 
     init_interrupts();
     init_seven_segment();
 }
-        void init_interrupts(){
-        
-        
-        }
-                /* ****************** MAIN ****************** */
+/* ****************** MAIN ****************** */
 
-      void main(void){
-          init();
-          blink_leds();
+void main(void){
+    init();
+    blink_leds();
     while (1){        
         test_all();
-              moving_leds();
+        moving_leds();
         CLRWDT();
     }
-           
+
 }
-        
+
 
