@@ -14,13 +14,32 @@
 
 #include "seven-segment.h"
 #include "leds.h"
-void init_interrupts(){
-    //https://openlabpro.com/guide/interrupt-handling-in-pic18f4550/
+unsigned char counter=0;//Overflow counter
 
-    INTCON.GIE = 1; 
-    INTCON.IPEN = 0;
+// interrupt address is 0x08
+__interrupt() void ISR(void){ 
+    // https://www.electronicwings.com/pic/pic18f4550-timer
+    //    if(TMR0IE && TMR0IF){
+    TMR1=0xF856;
+    PORTBbits.RB0 = ~PORTBbits.RB0;
+    PIR1bits.TMR1IF=0;  /* Make Timer1 Overflow Flag to '0' */
+    //    }
 }
 
+void init_interrupts(){
+    //https://openlabpro.com/guide/interrupt-handling-in-pic18f4550/
+    //SETUP TIMER0 
+    GIE=1;		/* Enable Global Interrupt */
+    PEIE=1;  		/* Enable Peripheral Interrupt */
+    TMR1IE=1;		/* Enable Timer1 Overflow Interrupt */
+    TMR1IF=0;
+
+    /* Enable 16-bit TMR1 register,no pre-scale,internal clock, timer OFF */
+    T1CON=0x80;		
+
+    TMR1=0xF856;	/* Load Count for generating delay of 1ms */
+    TMR1ON=1;		/* Turn ON Timer1 */
+}
 void init(){
     TRISBbits.RB0 = 0;
     TRISBbits.RB1 = 0;
@@ -35,13 +54,10 @@ void init(){
     init_seven_segment();
 }
 /* ****************** MAIN ****************** */
-
 void main(void){
     init();
     blink_leds();
     while (1){        
-        test_all();
-        moving_leds();
         CLRWDT();
     }
 
