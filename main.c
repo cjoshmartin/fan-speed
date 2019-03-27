@@ -17,10 +17,10 @@
 unsigned char counter=0;//Overflow counter
 
 void clear_leds(){
- PORTBbits.RB0 =0; 
- PORTBbits.RB1 =0; 
- PORTBbits.RB2 =0; 
- PORTBbits.RB3 =0; 
+    PORTBbits.RB0 =0; 
+    PORTBbits.RB1 =0; 
+    PORTBbits.RB2 =0; 
+    PORTBbits.RB3 =0; 
 }
 // interrupt address is 0x08
 __interrupt() void ISR(void){ 
@@ -29,25 +29,47 @@ __interrupt() void ISR(void){
     TMR1=0xF856;
 
     clear_leds();
-
-    switch(counter){
+    _clear_all();
+    switch(counter % 4){
         case 0: 
-             PORTBbits.RB0 = 1; 
-             break;
+            PORTBbits.RB0 = 1; 
+            break;
         case 1: 
-             PORTBbits.RB1 = 1; 
-             break;
+            PORTBbits.RB1 = 1; 
+            break;
         case 2: 
-             PORTBbits.RB2 = 1; 
-             break;
+            PORTBbits.RB2 = 1; 
+            break;
         case 3: 
-             PORTBbits.RB3 = 1; 
-             break;
+            PORTBbits.RB3 = 1; 
+            break;
     }
-    
-    counter++;
 
-    if(counter > 3)
+        switch(counter){ // 8-segment display
+            case 0:
+                PORTAbits.RA0 = 1;
+                break;
+            case 1:
+                PORTAbits.RA1 = 1;
+                break;
+            case 2:
+                PORTAbits.RA2 = 1;
+                break;
+            case 3:
+                PORTEbits.RE0 = 1;
+                break;
+            case 4:
+                PORTAbits.RA3 = 1;
+                break;
+            case 5:
+                PORTAbits.RA4 = 1;
+                break;
+            case 6:
+            PORTAbits.RA5 = 1;
+                break;
+        }
+
+    if(++counter > 6)
         counter = 0;
 
     PIR1bits.TMR1IF=0;  /* Make Timer1 Overflow Flag to '0' */
@@ -86,6 +108,11 @@ void main(void){
     init();
     blink_leds();
     while (1){        
+        PORTAbits.RA0 = 1;
+        PORTAbits.RA1 = 1;
+        PORTAbits.RA2 = 1;
+        PORTAbits.RA3 = 1;
+
         CLRWDT();
     }
 
