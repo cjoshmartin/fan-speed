@@ -45,29 +45,29 @@ __interrupt() void ISR(void){
             break;
     }
 
-        switch(counter){ // 8-segment display
-            case 0:
-                PORTAbits.RA0 = 1;
-                break;
-            case 1:
-                PORTAbits.RA1 = 1;
-                break;
-            case 2:
-                PORTAbits.RA2 = 1;
-                break;
-            case 3:
-                PORTEbits.RE0 = 1;
-                break;
-            case 4:
-                PORTAbits.RA3 = 1;
-                break;
-            case 5:
-                PORTAbits.RA4 = 1;
-                break;
-            case 6:
+    switch(counter){ // 8-segment display
+        case 0:
+            PORTAbits.RA0 = 1;
+            break;
+        case 1:
+            PORTAbits.RA1 = 1;
+            break;
+        case 2:
+            PORTAbits.RA2 = 1;
+            break;
+        case 3:
+            PORTEbits.RE0 = 1;
+            break;
+        case 4:
+            PORTAbits.RA3 = 1;
+            break;
+        case 5:
+            PORTAbits.RA4 = 1;
+            break;
+        case 6:
             PORTAbits.RA5 = 1;
-                break;
-        }
+            break;
+    }
 
     if(++counter > 6)
         counter = 0;
@@ -90,6 +90,43 @@ void init_interrupts(){
     TMR1=0xF856;	/* Load Count for generating delay of 1ms */
     TMR1ON=1;		/* Turn ON Timer1 */
 }
+#define Data_Out LATE0
+#define Data_In PORTEbits.RE1
+#define Data_Dir TRISEbits.RE1
+
+void init_DHT11(){
+    // https://www.electronicwings.com/pic/dht11-sensor-interfacing-with-pic18f4550
+    Data_Dir = 0;  /* set as output port */
+    Data_Out = 0;  /* send low pulse of min. 18 ms width */
+    __delay_ms(18);
+    Data_Out = 1;  /* pull data bus high */
+    __delay_us(20);
+    Data_Dir = 1;  /* set as input port */  
+}
+
+void DHT11_CheckResponse()
+{
+    while(Data_In & 1);  /* wait till bus is High */     
+    while(!(Data_In & 1));  /* wait till bus is Low */
+    while(Data_In & 1);  /* wait till bus is High */
+}
+
+char DHT11_ReadData()
+{
+    char i,data = 0;  
+    for(i=0;i<8;i++)
+    {
+        while(!(Data_In & 1));  /* wait till 0 pulse, this is start of data pulse */
+        __delay_us(30);         
+        if(Data_In & 1)  /* check whether data is 1 or 0 */    
+            data = ((data<<1) | 1); 
+        else
+            data = (data<<1);  
+        while(Data_In & 1);
+    }
+    return data;
+}
+
 void init(){
     TRISBbits.RB0 = 0;
     TRISBbits.RB1 = 0;
@@ -105,14 +142,26 @@ void init(){
 }
 /* ****************** MAIN ****************** */
 void main(void){
+    char __1, // don't care
+         __2, 
+         __3,
+         temputure_val_dec,
+         checksum;
     init();
     blink_leds();
     while (1){        
-        PORTAbits.RA0 = 1;
-        PORTAbits.RA1 = 1;
-        PORTAbits.RA2 = 1;
-        PORTAbits.RA3 = 1;
-
+        init_DHT11();
+        DHT11_CheckResponse();
+        __1 = DHT11_ReadData();  /* read Relative Humidity's integral value */
+        __2 = DHT11_ReadData();   /* read Relative Humidity's decimal value */
+        __3 = DHT11_ReadData();   /* read Temperature's integral value */
+        temputure_val_dec = DHT11_ReadData();    /* read Relative Temperature's decimal value */
+        checksum = DHT11_ReadData();     /* read 8-bit checksum value */
+        
+        /*
+         if (checksum != (__1 + __2 + __3 + checksum))
+         printf("ERRROR");
+         */
         CLRWDT();
     }
 
