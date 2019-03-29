@@ -1,6 +1,6 @@
 /*
  * File:   main.c
- * Author: Josh
+ * Author: Lacy
  *
  * Created on March 18, 2019, 7:12 PM
  */
