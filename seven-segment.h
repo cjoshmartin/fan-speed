@@ -3,16 +3,8 @@
 void _clear_all();
 void init_seven_segment();
 void test_all();
-void zero();
-void one();
-void two();
-void three();
-void four();
-void five();
-void six();
-void seven();
-void eight();
-void nine();
-void display_number(int i);
-
+void emergency(int value);
+void one(int value);
+void two(int value);
+void three(int value);
 #endif	/* SEGMENT_H */

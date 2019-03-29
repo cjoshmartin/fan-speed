@@ -57,110 +57,72 @@ void test_all(){
     delay(DELAY_AMOUNT);
 
 }
-void zero(){
-    PORTAbits.RA0 = 1;
-    PORTAbits.RA1 = 1;
-    PORTAbits.RA2 = 1;
-    PORTAbits.RA4 = 1;
-    PORTEbits.RE0 = 1;
-    PORTAbits.RA5 = 1;
-}
-
-void one(){
-    PORTAbits.RA0 = 1;
-    PORTAbits.RA1 = 1;
-}
-void two(){
-    PORTAbits.RA1 = 1;
-    PORTAbits.RA2 = 1;
-    PORTAbits.RA3 = 1;
-    PORTAbits.RA4 = 1;
-    PORTAbits.RA5 = 1;
-}
-void three(){
-    PORTAbits.RA1 = 1;
-    PORTAbits.RA2 = 1;
-    PORTAbits.RA3 = 1;
-    PORTAbits.RA0 = 1;
-    PORTAbits.RA5 = 1;
-}
-void four(){
-    PORTAbits.RA1 = 1;
-    PORTEbits.RE0 = 1;
-    PORTAbits.RA3 = 1;
-    PORTAbits.RA0 = 1;
-}
-void five(){
-    PORTEbits.RE0 = 1;
-    PORTAbits.RA2 = 1;
-    PORTAbits.RA3 = 1;
-    PORTAbits.RA0 = 1;
-    PORTAbits.RA5 = 1;
-}
-void six(){
-    PORTEbits.RE0 = 1;
-    PORTAbits.RA2 = 1;
-    PORTAbits.RA3 = 1;
-    PORTAbits.RA0 = 1;
-    PORTAbits.RA4 = 1;
-    PORTAbits.RA5 = 1;
-}
-void seven(){
-    PORTAbits.RA0 = 1;
-    PORTAbits.RA1 = 1;
-    PORTAbits.RA2 = 1;
-}
-void eight(){
-    PORTAbits.RA0 = 1;
-    PORTAbits.RA1 = 1;
-    PORTAbits.RA2 = 1;
-    PORTAbits.RA4 = 1;
-    PORTEbits.RE0 = 1;
-    PORTAbits.RA5 = 1;
-    PORTAbits.RA3 = 1;
-}
-void nine(){
-    PORTAbits.RA0 = 1;
-    PORTAbits.RA1 = 1;
-    PORTAbits.RA2 = 1;
-    PORTEbits.RE0 = 1;
-    PORTAbits.RA5 = 1;
-    PORTAbits.RA3 = 1;
-}
-void display_number(int i){
-    _clear_all();
-
-    switch(i){
+void emergency(int value){
+    switch(value % 5){
         case 0:
-            zero();
-            break;
+    PORTAbits.RA2 = 1;
+    break;
         case 1:
-            one();
-            break;
+    PORTAbits.RA3 = 1;
+    break;
         case 2:
-            two();
-            break;
+    PORTAbits.RA4 = 1;
+    break;
         case 3:
-            three();
-            break;
+    PORTEbits.RE0 = 1;
+    break;
         case 4:
-            four();
-            break;
-        case 5: 
-            five();
-            break;
-        case 6:
-            six();
-            break;
-        case 7: 
-            seven();
-            break;
-        case 8: 
-            eight();
-            break;
-        case 9:
-            nine();
-            break;
-    }
+    PORTAbits.RA5 = 1;
+    break;
+}
+}
 
+void one(int value){
+    
+    switch(value % 2){
+        case 0:
+    PORTAbits.RA0 = 1;
+    break;
+        case 1:
+    PORTAbits.RA1 = 1;
+    break;
+}
+}
+void two(int value){
+    switch (value % 5){
+        case 0:
+    PORTAbits.RA1 = 1;
+    break;
+        case 1:
+    PORTAbits.RA2 = 1;
+    break;
+        case 2:
+    PORTAbits.RA3 = 1;
+    break;
+        case 3:
+    PORTAbits.RA4 = 1;
+    break;
+        case 4:
+    PORTAbits.RA5 = 1;
+    break;
+}
+}
+void three(int value){
+    switch(value % 5){
+        case 0:
+    PORTAbits.RA1 = 1;
+    break;
+        case 1:
+    PORTAbits.RA2 = 1;
+    break;
+        case 2:
+    PORTAbits.RA3 = 1;
+    break;
+        case 3:
+    PORTAbits.RA0 = 1;
+    break;
+        case 4:
+    PORTAbits.RA5 = 1;
+    break;
+   }
 }

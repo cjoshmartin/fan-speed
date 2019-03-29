@@ -10,12 +10,12 @@
 
 #include <xc.h>
 #include <pic18f4331.h>
+#include <limits.h>
 #include <stdio.h>
 
 #include "seven-segment.h"
 #include "leds.h"
-unsigned char counter=0;//Overflow counter
-
+unsigned int counter=0,counter_ms =0, counter_seg = 0;//Overflow counter
 void clear_leds(){
     PORTBbits.RB0 =0; 
     PORTBbits.RB1 =0; 
@@ -25,12 +25,11 @@ void clear_leds(){
 // interrupt address is 0x08
 __interrupt() void ISR(void){ 
     // https://www.electronicwings.com/pic/pic18f4550-timer
-    //    if(TMR0IE && TMR0IF){
     TMR1=0xF856;
-
     clear_leds();
     _clear_all();
-    switch(counter % 4){
+    
+    switch(counter_seg){
         case 0: 
             PORTBbits.RB0 = 1; 
             break;
@@ -44,36 +43,30 @@ __interrupt() void ISR(void){
             PORTBbits.RB3 = 1; 
             break;
     }
-
-    switch(counter){ // 8-segment display
+    switch(counter_seg){
         case 0:
-            PORTAbits.RA0 = 1;
+            one(counter_ms);
             break;
         case 1:
-            PORTAbits.RA1 = 1;
+            two(counter_ms);
             break;
         case 2:
-            PORTAbits.RA2 = 1;
+            three(counter_ms);
             break;
         case 3:
-            PORTEbits.RE0 = 1;
-            break;
-        case 4:
-            PORTAbits.RA3 = 1;
-            break;
-        case 5:
-            PORTAbits.RA4 = 1;
-            break;
-        case 6:
-            PORTAbits.RA5 = 1;
+            emergency(counter_ms);
             break;
     }
-
-    if(++counter > 6)
-        counter = 0;
-
+    if (counter_ms % 1000 == 0){
+        if (++counter_seg > 3){
+            counter_seg = 0;
+        }
+    }
+    if(++counter_ms == INT_MAX)
+    {
+        counter_ms = 0;
+    }
     PIR1bits.TMR1IF=0;  /* Make Timer1 Overflow Flag to '0' */
-    //    }
 }
 
 void init_interrupts(){
@@ -142,12 +135,24 @@ void init(){
 }
 /* ****************** MAIN ****************** */
 void main(void){
-    char __1, // don't care
+     unsigned int duty_cycle;  
+         char __1, // don't care
          __2, 
          __3,
          temputure_val_dec,
          checksum;
+         
+    OSCCON=0x72;         /* set internal clock to 8MHz */
+    TRISCbits.TRISC2=0;  /* Set CCP1 pin as output for PWM out */
+    PR2=199;             /* load period value in PR2 register */ 
+    CCPR1L=1;            /* load duty cycle */
+    T2CON=0;             /* no pre-scalar,timer2 is off */
+    CCP1CON=0x0C;        /* set PWM mode and no decimal value for PWM */
+    TMR2=0;
+    
     init();
+    T2CONbits.TMR2ON=1;  /* Turn ON Timer2 */
+
     blink_leds();
     while (1){        
         init_DHT11();
@@ -162,7 +167,20 @@ void main(void){
          if (checksum != (__1 + __2 + __3 + checksum))
          printf("ERRROR");
          */
-        CLRWDT();
+        for(duty_cycle=1;duty_cycle<199;duty_cycle++)
+        {
+            CCPR1L = duty_cycle;   /* load duty cycle */
+            __delay_ms(20);
+        }
+        __delay_ms(500);
+        
+        for(duty_cycle=199;duty_cycle>1;duty_cycle--)
+        {
+            CCPR1L = duty_cycle;   /* load duty cycle */
+            __delay_ms(20);
+        }
+        __delay_ms(500);
+//        CLRWDT();
     }
 
 }
