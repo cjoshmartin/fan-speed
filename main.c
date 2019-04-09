@@ -28,37 +28,30 @@ __interrupt() void ISR(void){
     TMR1=0xF856;
     clear_leds();
     _clear_all();
-    
+
     switch(counter_seg){
         case 0: 
+            break; // do nothing
+
+        case 1: 
+            one(counter_ms);
             PORTBbits.RB0 = 1; 
             break;
-        case 1: 
+        case 2: 
+            two(counter_ms);
             PORTBbits.RB1 = 1; 
             break;
-        case 2: 
+        case 3: 
+            three(counter_ms);
             PORTBbits.RB2 = 1; 
             break;
-        case 3: 
+        case 4: 
+            emergency(counter_ms);
             PORTBbits.RB3 = 1; 
             break;
     }
-    switch(counter_seg){
-        case 0:
-            one(counter_ms);
-            break;
-        case 1:
-            two(counter_ms);
-            break;
-        case 2:
-            three(counter_ms);
-            break;
-        case 3:
-            emergency(counter_ms);
-            break;
-    }
     if (counter_ms % 1000 == 0){
-        if (++counter_seg > 3){
+        if (++counter_seg > 4){
             counter_seg = 0;
         }
     }
@@ -66,6 +59,7 @@ __interrupt() void ISR(void){
     {
         counter_ms = 0;
     }
+
     PIR1bits.TMR1IF=0;  /* Make Timer1 Overflow Flag to '0' */
 }
 
@@ -135,13 +129,13 @@ void init(){
 }
 /* ****************** MAIN ****************** */
 void main(void){
-     unsigned int duty_cycle;  
-         char __1, // don't care
+    unsigned int duty_cycle;  
+    char __1, // don't care
          __2, 
          __3,
          temputure_val_dec,
          checksum;
-         
+
     OSCCON=0x72;         /* set internal clock to 8MHz */
     TRISCbits.TRISC2=0;  /* Set CCP1 pin as output for PWM out */
     PR2=199;             /* load period value in PR2 register */ 
@@ -149,7 +143,7 @@ void main(void){
     T2CON=0;             /* no pre-scalar,timer2 is off */
     CCP1CON=0x0C;        /* set PWM mode and no decimal value for PWM */
     TMR2=0;
-    
+
     init();
     T2CONbits.TMR2ON=1;  /* Turn ON Timer2 */
 
@@ -162,25 +156,25 @@ void main(void){
         __3 = DHT11_ReadData();   /* read Temperature's integral value */
         temputure_val_dec = DHT11_ReadData();    /* read Relative Temperature's decimal value */
         checksum = DHT11_ReadData();     /* read 8-bit checksum value */
-        
+
         /*
-         if (checksum != (__1 + __2 + __3 + checksum))
-         printf("ERRROR");
-         */
+           if (checksum != (__1 + __2 + __3 + checksum))
+           printf("ERRROR");
+           */
         for(duty_cycle=1;duty_cycle<199;duty_cycle++)
         {
             CCPR1L = duty_cycle;   /* load duty cycle */
             __delay_ms(20);
         }
         __delay_ms(500);
-        
+
         for(duty_cycle=199;duty_cycle>1;duty_cycle--)
         {
             CCPR1L = duty_cycle;   /* load duty cycle */
             __delay_ms(20);
         }
         __delay_ms(500);
-//        CLRWDT();
+        //        CLRWDT();
     }
 
 }
