@@ -21,6 +21,7 @@ void clear_leds(){
     PORTBbits.RB1 =0; 
     PORTBbits.RB2 =0; 
     PORTBbits.RB3 =0; 
+    PORTBbits.RB4 = 1;
 }
 // interrupt address is 0x08
 __interrupt() void ISR(void){ 
@@ -32,7 +33,6 @@ __interrupt() void ISR(void){
     switch(counter_seg){
         case 0: 
             break; // do nothing
-
         case 1: 
             one(counter_ms);
             PORTBbits.RB0 = 1; 
@@ -119,11 +119,12 @@ void init(){
     TRISBbits.RB1 = 0;
     TRISBbits.RB2 = 0;
     TRISBbits.RB3 = 0;
+    TRISBbits.RB4 = 0;
     TRISBbits.TRISB0 = 0;
     TRISBbits.TRISB1 = 0;
     TRISBbits.TRISB2 = 0;
     TRISBbits.TRISB3 = 0;
-
+    TRISBbits.TRISB4 = 0;
     init_interrupts();
     init_seven_segment();
 }
@@ -156,25 +157,7 @@ void main(void){
         __3 = DHT11_ReadData();   /* read Temperature's integral value */
         temputure_val_dec = DHT11_ReadData();    /* read Relative Temperature's decimal value */
         checksum = DHT11_ReadData();     /* read 8-bit checksum value */
-
-        /*
-           if (checksum != (__1 + __2 + __3 + checksum))
-           printf("ERRROR");
-           */
-        for(duty_cycle=1;duty_cycle<199;duty_cycle++)
-        {
-            CCPR1L = duty_cycle;   /* load duty cycle */
-            __delay_ms(20);
-        }
-        __delay_ms(500);
-
-        for(duty_cycle=199;duty_cycle>1;duty_cycle--)
-        {
-            CCPR1L = duty_cycle;   /* load duty cycle */
-            __delay_ms(20);
-        }
-        __delay_ms(500);
-        //        CLRWDT();
+        
     }
 
 }
