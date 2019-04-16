@@ -15,7 +15,10 @@
 
 #include "seven-segment.h"
 #include "leds.h"
-unsigned int counter=0,counter_ms =0, counter_seg = 0, is_emergency = 0;//Overflow counter
+unsigned int counter=0,
+        counter_ms =0, 
+        counter_seg = 0, 
+        is_emergency = 0;
 void clear_leds(){
     PORTBbits.RB0 =0; 
     PORTBbits.RB1 =0; 
@@ -105,42 +108,6 @@ void init_interrupts(){
     TMR1=0xF856;	/* Load Count for generating delay of 1ms */
     TMR1ON=1;		/* Turn ON Timer1 */
 }
-#define Data_Out LATE0
-#define Data_In PORTEbits.RE1
-#define Data_Dir TRISEbits.RE1
-
-void init_DHT11(){
-    // https://www.electronicwings.com/pic/dht11-sensor-interfacing-with-pic18f4550
-    Data_Dir = 0;  /* set as output port */
-    Data_Out = 0;  /* send low pulse of min. 18 ms width */
-    __delay_ms(18);
-    Data_Out = 1;  /* pull data bus high */
-    __delay_us(20);
-    Data_Dir = 1;  /* set as input port */  
-}
-
-void DHT11_CheckResponse()
-{
-    while(Data_In & 1);  /* wait till bus is High */     
-    while(!(Data_In & 1));  /* wait till bus is Low */
-    while(Data_In & 1);  /* wait till bus is High */
-}
-
-char DHT11_ReadData()
-{
-    char i,data = 0;  
-    for(i=0;i<8;i++)
-    {
-        while(!(Data_In & 1));  /* wait till 0 pulse, this is start of data pulse */
-        __delay_us(30);         
-        if(Data_In & 1)  /* check whether data is 1 or 0 */    
-            data = ((data<<1) | 1); 
-        else
-            data = (data<<1);  
-        while(Data_In & 1);
-    }
-    return data;
-}
 
 void  External_Interrupt_Init(){
     TRISCbits.TRISC3 = 1; /* Make INT0 pin as an input pin*/    
@@ -196,16 +163,7 @@ void main(void){
     T2CONbits.TMR2ON=1;  /* Turn ON Timer2 */
 
     blink_leds();
-    while (1){        
-        //        init_DHT11();
-        //        DHT11_CheckResponse();
-        //        __1 = DHT11_ReadData();  /* read Relative Humidity's integral value */
-        //        __2 = DHT11_ReadData();   /* read Relative Humidity's decimal value */
-        //        __3 = DHT11_ReadData();   /* read Temperature's integral value */
-        //        temputure_val_dec = DHT11_ReadData();    /* read Relative Temperature's decimal value */
-        //        checksum = DHT11_ReadData();     /* read 8-bit checksum value */
-
-    }
+    while (1);
 
 }
 
