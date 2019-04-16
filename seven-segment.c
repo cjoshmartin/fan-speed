@@ -57,6 +57,30 @@ void test_all(){
     delay(DELAY_AMOUNT);
 
 }
+
+void zero(int value){
+    switch(value % 6){
+        case 0:
+            PORTAbits.RA0 = 1;
+            break;
+        case 1:
+            PORTAbits.RA1 = 1;
+            break;
+        case 2:
+            PORTAbits.RA3 = 1;
+            break;
+        case 3:
+            PORTAbits.RA4 = 1;
+            break;
+        case 4: 
+        PORTEbits.RE0 = 1;
+        break;
+        case 5: 
+           PORTAbits.RA5 = 1;
+          break;
+    }
+}
+
 void emergency(int value){
     switch(value % 5){
         case 0:

@@ -4,6 +4,7 @@ void _clear_all();
 void init_seven_segment();
 void test_all();
 void emergency(int value);
+void zero(int value);
 void one(int value);
 void two(int value);
 void three(int value);

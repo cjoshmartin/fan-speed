@@ -15,7 +15,7 @@
 
 #include "seven-segment.h"
 #include "leds.h"
-unsigned int counter=0,counter_ms =0, counter_seg = 3;//Overflow counter
+unsigned int counter=0,counter_ms =0, counter_seg = 0, is_emergency;//Overflow counter
 void clear_leds(){
     PORTBbits.RB0 =0; 
     PORTBbits.RB1 =0; 
@@ -29,49 +29,60 @@ void set_fan(int value){
 // interrupt address is 0x08
 __interrupt() void ISR(void){ 
     // https://www.electronicwings.com/pic/pic18f4550-timer
-
-    if (INTCONbits.INT0IF == 1) {
-            counter_seg = 1;
+    
+    if (0){ // INTC0Nbits.INT1IF == 1
+    
     }
-        if(0){
-            //            set_fan(~PORTBbits.RB4);
-        }
-//        else if (TMR1IE && TMR1IF){
+    else if (INTCONbits.INT0IF == 1) {
+            if (++counter_seg > 3){
+                counter_seg = 0;
+            }
+            INTCONbits.INT0F = 0;
+    }
+   
             TMR1=0xF856;
             clear_leds();
             _clear_all();
-
+            
+            if(is_emergency){
+                 emergency(counter_ms);
+                    PORTBbits.RB3 = 1; 
+                    set_fan(0);
+                    switch(counter_ms % 3){
+                        case 0:
+                            PORTBbits.RB2 = 1;
+                            break;
+                        case 1:
+                             PORTBbits.RB1 = 1; 
+                            break;
+                        case 2:
+                             PORTBbits.RB0 = 1; 
+                             break;
+                    }
+            }
+            else{
             switch(counter_seg){
                 case 0: 
-                    break; // do nothing
-                    //            set_fan(0);
+                    zero(counter_ms);
+                    set_fan(0);
+                    break; 
                 case 1: 
                     one(counter_ms);
                     PORTBbits.RB0 = 1; 
-                    //            set_fan(1);
+                                set_fan(1);
                     break;
                 case 2: 
                     two(counter_ms);
                     PORTBbits.RB1 = 1; 
-                    //            set_fan(1);
+                                set_fan(1);
                     break;
                 case 3: 
                     three(counter_ms);
                     PORTBbits.RB2 = 1; 
                     set_fan(1);
                     break;
-                case 4: 
-                    emergency(counter_ms);
-                    PORTBbits.RB3 = 1; 
-                    //            set_fan(0);
-                    break;
             }
-            //    if (counter_ms % 1000 == 0){
-            //        if (++counter_seg > 4){
-            //            counter_seg = 0;
-            //        }
-            //    }
-//        }
+            }
     if(++counter_ms == INT_MAX){
         counter_ms = 0;
     }
@@ -135,7 +146,8 @@ void  External_Interrupt_Init(){
     /* Also make PBADEN off in Configuration file or
     clear ADON in ADCON0 so as to set analog pin as digital*/
   
-    INTCON2=0x00;		/* Set Interrupt on falling Edge*/
+//    INTCON2=0x00;		/* Set Interrupt on falling Edge*/
+    INTCON2 = 0x80;
     INTCONbits.INT0IF=0;	/* Clear INT0IF flag*/
     INTCONbits.INT0IE=1;	/* Enable INT0 external interrupt*/
     INTCONbits.GIE=1;		/* Enable Global Interrupt*/
