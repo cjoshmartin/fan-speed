@@ -31,68 +31,67 @@ void clear_leds(){
 void set_fan(int value){
     PORTBbits.RB4 = value;
 }
-// interrupt address is 0x08
-//__interrupt() void ISR(void){ 
-//    if (INTCON3bits.INT1F == 1){
-//        is_emergency = ~ is_emergency;
-//        INTCON3bits.INT1F = 0;
-//    }
-//    else if ( !is_emergency && INTCONbits.INT0IF == 1) {
-//        if (++counter_seg > 3){
-//            counter_seg = 0;
-//        }
-//        INTCONbits.INT0F = 0;
-//    }
-//
-//    TMR1=0xF856;
-//    clear_leds();
-//    _clear_all();
-//
-//    if(is_emergency){
-//        emergency(counter_ms);
-//        PORTBbits.RB3 = 1; 
-//        set_fan(0);
-//        switch(counter_ms % 3){
-//            case 0:
-//                PORTBbits.RB2 = 1;
-//                break;
-//            case 1:
-//                PORTBbits.RB1 = 1; 
-//                break;
-//            case 2:
-//                PORTBbits.RB0 = 1; 
-//                break;
-//        }
-//    }
-//    else{
-//        switch(counter_seg){
-//            case 0: 
-//                zero(counter_ms);
-//                set_fan(0);
-//                break; 
-//            case 1: 
-//                one(counter_ms);
-//                PORTBbits.RB0 = 1; 
-//                set_fan(1);
-//                break;
-//            case 2: 
-//                two(counter_ms);
-//                PORTBbits.RB1 = 1; 
-//                set_fan(1);
-//                break;
-//            case 3: 
-//                three(counter_ms);
-//                PORTBbits.RB2 = 1; 
-//                set_fan(1);
-//                break;
-//        }
-//    }
-//    if(++counter_ms == INT_MAX){
-//        counter_ms = 0;
-//    }
-//
-//    PIR1bits.TMR1IF=0;  /* Make Timer1 Overflow Flag to '0' */
-//}
+__interrupt() void ISR(void){ 
+    if (INTCON3bits.INT1F == 1){
+        is_emergency = ~ is_emergency;
+        INTCON3bits.INT1F = 0;
+    }
+    else if ( !is_emergency && INTCONbits.INT0IF == 1) {
+        if (++counter_seg > 3){
+            counter_seg = 0;
+        }
+        INTCONbits.INT0F = 0;
+    }
+
+    TMR1=0xF856;
+    clear_leds();
+    _clear_all();
+
+    if(is_emergency){
+        emergency(counter_ms);
+        PORTBbits.RB3 = 1; 
+        setPDC3(5);
+        switch(counter_ms % 3){
+            case 0:
+                PORTBbits.RB2 = 1;
+                break;
+            case 1:
+                PORTBbits.RB1 = 1; 
+                break;
+            case 2:
+                PORTBbits.RB0 = 1; 
+                break;
+        }
+    }
+    else{
+        switch(counter_seg){
+            case 0: 
+                zero(counter_ms);
+                setPDC3(0);
+                break; 
+            case 1: 
+                one(counter_ms);
+                PORTBbits.RB0 = 1; 
+                setPDC3(50);
+                break;
+            case 2: 
+                two(counter_ms);
+                PORTBbits.RB1 = 1; 
+                setPDC3(75);
+                break;
+            case 3: 
+                three(counter_ms);
+                PORTBbits.RB2 = 1; 
+                setPDC3(100);
+                break;
+        }
+    }
+    if(++counter_ms == INT_MAX){
+        counter_ms = 0;
+    }
+
+    PIR1bits.TMR1IF=0;  /* Make Timer1 Overflow Flag to '0' */
+}
 
 void init_interrupts(){
     //https://openlabpro.com/guide/interrupt-handling-in-pic18f4550/
@@ -127,6 +126,8 @@ void  External_Interrupt_Init(){
     INTCONbits.GIE=1;		/* Enable Global Interrupt*/
 }
 void init(){
+     enablePWM(0b01011111);
+     configPWMFreq(5e4);
     TRISBbits.RB0 = 0;
     TRISBbits.RB1 = 0;
     TRISBbits.RB2 = 0;
@@ -137,7 +138,6 @@ void init(){
     TRISBbits.TRISB2 = 0;
     TRISBbits.TRISB3 = 0;
     TRISBbits.TRISB4 = 0;
-    set_fan(0);
     External_Interrupt_Init();
     init_interrupts();
     init_seven_segment();
@@ -145,17 +145,10 @@ void init(){
 /* ****************** MAIN ****************** */
 void main(void){
     OSCCON=0x72;         /* set internal clock to 8MHz */
-//    init();
+    init();
     
-//    led_pwm_init();
-//    blink_leds();
-     enablePWM(0b01011111);
-     configPWMFreq(5e4);
-    // setPDC0(15); // 50% - 100% 
-     setPDC3(100);
-    while (1){
-//        led_pwm_control();
-    }
+    blink_leds();
+    while (1);
 
 }
 
