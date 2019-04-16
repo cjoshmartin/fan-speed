@@ -22,15 +22,13 @@ unsigned int counter=0,
         is_emergency = 0;
 
 void clear_leds(){
-    PORTBbits.RB0 =0; 
-    PORTBbits.RB1 =0; 
-    PORTBbits.RB2 =0; 
-    PORTBbits.RB3 =0; 
+    PORTCbits.RC6 =0; 
+    PORTDbits.RD4 =0; 
+    PORTCbits.RC7 =0; 
+    PORTDbits.RD5 =0; 
 }
 
-void set_fan(int value){
-    PORTBbits.RB4 = value;
-}
+
 __interrupt() void ISR(void){ 
     if (INTCON3bits.INT1F == 1){
         is_emergency = ~ is_emergency;
@@ -49,17 +47,17 @@ __interrupt() void ISR(void){
 
     if(is_emergency){
         emergency(counter_ms);
-        PORTBbits.RB3 = 1; 
+        PORTDbits.RD4 = 1; 
         setPDC3(5);
         switch(counter_ms % 3){
             case 0:
-                PORTBbits.RB2 = 1;
+                PORTCbits.RC7 = 1;
                 break;
             case 1:
                 PORTBbits.RB1 = 1; 
                 break;
             case 2:
-                PORTBbits.RB0 = 1; 
+                PORTCbits.RC6 = 1; 
                 break;
         }
     }
@@ -71,7 +69,7 @@ __interrupt() void ISR(void){
                 break; 
             case 1: 
                 one(counter_ms);
-                PORTBbits.RB0 = 1; 
+                PORTCbits.RC6 = 1; 
                 setPDC3(50);
                 break;
             case 2: 
@@ -81,7 +79,7 @@ __interrupt() void ISR(void){
                 break;
             case 3: 
                 three(counter_ms);
-                PORTBbits.RB2 = 1; 
+                PORTCbits.RC7 = 1; 
                 setPDC3(100);
                 break;
         }
@@ -128,16 +126,20 @@ void  External_Interrupt_Init(){
 void init(){
      enablePWM(0b01011111);
      configPWMFreq(5e4);
-    TRISBbits.RB0 = 0;
-    TRISBbits.RB1 = 0;
-    TRISBbits.RB2 = 0;
-    TRISBbits.RB3 = 0;
-    TRISBbits.RB4 = 0;
-    TRISBbits.TRISB0 = 0;
-    TRISBbits.TRISB1 = 0;
-    TRISBbits.TRISB2 = 0;
-    TRISBbits.TRISB3 = 0;
-    TRISBbits.TRISB4 = 0;
+    PORTCbits.RC6 =0; 
+    
+    TRISCbits.RC6 = 0;
+    TRISCbits.TRISC6 = 0;
+    
+    TRISDbits.RD4 = 0;
+    TRISDbits.TRISD4 = 0;
+    
+    TRISCbits.RC7 = 0;
+    TRISCbits.TRISC7= 0;
+    
+    TRISDbits.RD5 =0; 
+    TRISDbits.TRISD5 = 0;
+   
     External_Interrupt_Init();
     init_interrupts();
     init_seven_segment();
