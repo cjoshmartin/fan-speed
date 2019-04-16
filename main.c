@@ -15,7 +15,7 @@
 
 #include "seven-segment.h"
 #include "leds.h"
-unsigned int counter=0,counter_ms =0, counter_seg = 0, is_emergency;//Overflow counter
+unsigned int counter=0,counter_ms =0, counter_seg = 0, is_emergency = 0;//Overflow counter
 void clear_leds(){
     PORTBbits.RB0 =0; 
     PORTBbits.RB1 =0; 
@@ -29,60 +29,61 @@ void set_fan(int value){
 // interrupt address is 0x08
 __interrupt() void ISR(void){ 
     // https://www.electronicwings.com/pic/pic18f4550-timer
-    
-    if (0){ // INTC0Nbits.INT1IF == 1
-    
+
+    if (INTCON3bits.INT1F == 1){
+        is_emergency = ~ is_emergency;
+        INTCON3bits.INT1F = 0;
     }
-    else if (INTCONbits.INT0IF == 1) {
-            if (++counter_seg > 3){
-                counter_seg = 0;
-            }
-            INTCONbits.INT0F = 0;
+    else if ( !is_emergency && INTCONbits.INT0IF == 1) {
+        if (++counter_seg > 3){
+            counter_seg = 0;
+        }
+        INTCONbits.INT0F = 0;
     }
-   
-            TMR1=0xF856;
-            clear_leds();
-            _clear_all();
-            
-            if(is_emergency){
-                 emergency(counter_ms);
-                    PORTBbits.RB3 = 1; 
-                    set_fan(0);
-                    switch(counter_ms % 3){
-                        case 0:
-                            PORTBbits.RB2 = 1;
-                            break;
-                        case 1:
-                             PORTBbits.RB1 = 1; 
-                            break;
-                        case 2:
-                             PORTBbits.RB0 = 1; 
-                             break;
-                    }
-            }
-            else{
-            switch(counter_seg){
-                case 0: 
-                    zero(counter_ms);
-                    set_fan(0);
-                    break; 
-                case 1: 
-                    one(counter_ms);
-                    PORTBbits.RB0 = 1; 
-                                set_fan(1);
-                    break;
-                case 2: 
-                    two(counter_ms);
-                    PORTBbits.RB1 = 1; 
-                                set_fan(1);
-                    break;
-                case 3: 
-                    three(counter_ms);
-                    PORTBbits.RB2 = 1; 
-                    set_fan(1);
-                    break;
-            }
-            }
+
+    TMR1=0xF856;
+    clear_leds();
+    _clear_all();
+
+    if(is_emergency){
+        emergency(counter_ms);
+        PORTBbits.RB3 = 1; 
+        set_fan(0);
+        switch(counter_ms % 3){
+            case 0:
+                PORTBbits.RB2 = 1;
+                break;
+            case 1:
+                PORTBbits.RB1 = 1; 
+                break;
+            case 2:
+                PORTBbits.RB0 = 1; 
+                break;
+        }
+    }
+    else{
+        switch(counter_seg){
+            case 0: 
+                zero(counter_ms);
+                set_fan(0);
+                break; 
+            case 1: 
+                one(counter_ms);
+                PORTBbits.RB0 = 1; 
+                set_fan(1);
+                break;
+            case 2: 
+                two(counter_ms);
+                PORTBbits.RB1 = 1; 
+                set_fan(1);
+                break;
+            case 3: 
+                three(counter_ms);
+                PORTBbits.RB2 = 1; 
+                set_fan(1);
+                break;
+        }
+    }
     if(++counter_ms == INT_MAX){
         counter_ms = 0;
     }
@@ -142,14 +143,20 @@ char DHT11_ReadData()
 }
 
 void  External_Interrupt_Init(){
-    TRISCbits.TRISC3 = 1; /* Make INT0 pin as an input pin*/
-    /* Also make PBADEN off in Configuration file or
-    clear ADON in ADCON0 so as to set analog pin as digital*/
-  
-//    INTCON2=0x00;		/* Set Interrupt on falling Edge*/
+    TRISCbits.TRISC3 = 1; /* Make INT0 pin as an input pin*/    
+    TRISCbits.TRISC4 = 1; /* Make INT1 pin as an input pin*/
+
+    //    INTCON2=0x00;		/* Set Interrupt on falling Edge*/
     INTCON2 = 0x80;
     INTCONbits.INT0IF=0;	/* Clear INT0IF flag*/
     INTCONbits.INT0IE=1;	/* Enable INT0 external interrupt*/
+
+    INTCON3bits.INT1IF=0;	/* Clear INT1IF flag*/
+    INTCON3bits.INT1IE=1;	/* Enable INT1 external interrupt*/
+    /*
+    * Interupt 2 
+    */
+
     INTCONbits.GIE=1;		/* Enable Global Interrupt*/
 }
 
@@ -190,14 +197,14 @@ void main(void){
 
     blink_leds();
     while (1){        
-//        init_DHT11();
-//        DHT11_CheckResponse();
-//        __1 = DHT11_ReadData();  /* read Relative Humidity's integral value */
-//        __2 = DHT11_ReadData();   /* read Relative Humidity's decimal value */
-//        __3 = DHT11_ReadData();   /* read Temperature's integral value */
-//        temputure_val_dec = DHT11_ReadData();    /* read Relative Temperature's decimal value */
-//        checksum = DHT11_ReadData();     /* read 8-bit checksum value */
-        
+        //        init_DHT11();
+        //        DHT11_CheckResponse();
+        //        __1 = DHT11_ReadData();  /* read Relative Humidity's integral value */
+        //        __2 = DHT11_ReadData();   /* read Relative Humidity's decimal value */
+        //        __3 = DHT11_ReadData();   /* read Temperature's integral value */
+        //        temputure_val_dec = DHT11_ReadData();    /* read Relative Temperature's decimal value */
+        //        checksum = DHT11_ReadData();     /* read 8-bit checksum value */
+
     }
 
 }
