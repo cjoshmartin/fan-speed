@@ -15,48 +15,64 @@
 
 #include "seven-segment.h"
 #include "leds.h"
-unsigned int counter=0,counter_ms =0, counter_seg = 0;//Overflow counter
+unsigned int counter=0,counter_ms =0, counter_seg = 3;//Overflow counter
 void clear_leds(){
     PORTBbits.RB0 =0; 
     PORTBbits.RB1 =0; 
     PORTBbits.RB2 =0; 
     PORTBbits.RB3 =0; 
-    PORTBbits.RB4 = 1;
+}
+
+void set_fan(int value){
+    PORTBbits.RB4 = value;
 }
 // interrupt address is 0x08
 __interrupt() void ISR(void){ 
     // https://www.electronicwings.com/pic/pic18f4550-timer
-    TMR1=0xF856;
-    clear_leds();
-    _clear_all();
 
-    switch(counter_seg){
-        case 0: 
-            break; // do nothing
-        case 1: 
-            one(counter_ms);
-            PORTBbits.RB0 = 1; 
-            break;
-        case 2: 
-            two(counter_ms);
-            PORTBbits.RB1 = 1; 
-            break;
-        case 3: 
-            three(counter_ms);
-            PORTBbits.RB2 = 1; 
-            break;
-        case 4: 
-            emergency(counter_ms);
-            PORTBbits.RB3 = 1; 
-            break;
+    if (INTCONbits.INT0IF == 1) {
+            counter_seg = 1;
     }
-    if (counter_ms % 1000 == 0){
-        if (++counter_seg > 4){
-            counter_seg = 0;
+        if(0){
+            //            set_fan(~PORTBbits.RB4);
         }
-    }
-    if(++counter_ms == INT_MAX)
-    {
+//        else if (TMR1IE && TMR1IF){
+            TMR1=0xF856;
+            clear_leds();
+            _clear_all();
+
+            switch(counter_seg){
+                case 0: 
+                    break; // do nothing
+                    //            set_fan(0);
+                case 1: 
+                    one(counter_ms);
+                    PORTBbits.RB0 = 1; 
+                    //            set_fan(1);
+                    break;
+                case 2: 
+                    two(counter_ms);
+                    PORTBbits.RB1 = 1; 
+                    //            set_fan(1);
+                    break;
+                case 3: 
+                    three(counter_ms);
+                    PORTBbits.RB2 = 1; 
+                    set_fan(1);
+                    break;
+                case 4: 
+                    emergency(counter_ms);
+                    PORTBbits.RB3 = 1; 
+                    //            set_fan(0);
+                    break;
+            }
+            //    if (counter_ms % 1000 == 0){
+            //        if (++counter_seg > 4){
+            //            counter_seg = 0;
+            //        }
+            //    }
+//        }
+    if(++counter_ms == INT_MAX){
         counter_ms = 0;
     }
 
@@ -114,6 +130,17 @@ char DHT11_ReadData()
     return data;
 }
 
+void  External_Interrupt_Init(){
+    TRISCbits.TRISC3 = 1; /* Make INT0 pin as an input pin*/
+    /* Also make PBADEN off in Configuration file or
+    clear ADON in ADCON0 so as to set analog pin as digital*/
+  
+    INTCON2=0x00;		/* Set Interrupt on falling Edge*/
+    INTCONbits.INT0IF=0;	/* Clear INT0IF flag*/
+    INTCONbits.INT0IE=1;	/* Enable INT0 external interrupt*/
+    INTCONbits.GIE=1;		/* Enable Global Interrupt*/
+}
+
 void init(){
     TRISBbits.RB0 = 0;
     TRISBbits.RB1 = 0;
@@ -125,6 +152,8 @@ void init(){
     TRISBbits.TRISB2 = 0;
     TRISBbits.TRISB3 = 0;
     TRISBbits.TRISB4 = 0;
+    set_fan(0);
+    External_Interrupt_Init();
     init_interrupts();
     init_seven_segment();
 }
@@ -142,7 +171,6 @@ void main(void){
     PR2=199;             /* load period value in PR2 register */ 
     CCPR1L=1;            /* load duty cycle */
     T2CON=0;             /* no pre-scalar,timer2 is off */
-    CCP1CON=0x0C;        /* set PWM mode and no decimal value for PWM */
     TMR2=0;
 
     init();
@@ -150,13 +178,13 @@ void main(void){
 
     blink_leds();
     while (1){        
-        init_DHT11();
-        DHT11_CheckResponse();
-        __1 = DHT11_ReadData();  /* read Relative Humidity's integral value */
-        __2 = DHT11_ReadData();   /* read Relative Humidity's decimal value */
-        __3 = DHT11_ReadData();   /* read Temperature's integral value */
-        temputure_val_dec = DHT11_ReadData();    /* read Relative Temperature's decimal value */
-        checksum = DHT11_ReadData();     /* read 8-bit checksum value */
+//        init_DHT11();
+//        DHT11_CheckResponse();
+//        __1 = DHT11_ReadData();  /* read Relative Humidity's integral value */
+//        __2 = DHT11_ReadData();   /* read Relative Humidity's decimal value */
+//        __3 = DHT11_ReadData();   /* read Temperature's integral value */
+//        temputure_val_dec = DHT11_ReadData();    /* read Relative Temperature's decimal value */
+//        checksum = DHT11_ReadData();     /* read 8-bit checksum value */
         
     }
 
