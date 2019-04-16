@@ -19,6 +19,7 @@ unsigned int counter=0,
         counter_ms =0, 
         counter_seg = 0, 
         is_emergency = 0;
+
 void clear_leds(){
     PORTBbits.RB0 =0; 
     PORTBbits.RB1 =0; 
@@ -31,8 +32,6 @@ void set_fan(int value){
 }
 // interrupt address is 0x08
 __interrupt() void ISR(void){ 
-    // https://www.electronicwings.com/pic/pic18f4550-timer
-
     if (INTCON3bits.INT1F == 1){
         is_emergency = ~ is_emergency;
         INTCON3bits.INT1F = 0;
@@ -127,6 +126,45 @@ void  External_Interrupt_Init(){
     INTCONbits.GIE=1;		/* Enable Global Interrupt*/
 }
 
+/*
+ * File:   pwm.c
+ * Author: bsow
+ *
+ * Created on April 11, 2019, 5:46 PM
+ */
+
+
+void led_pwm_init()
+{
+    TRISCbits.TRISC2 = 0;  /* Set CCP1 pin as output for PWM out */
+    PR2 = 199;             /* load period value in PR2 register */ 
+    CCPR1L = 1;            /* load duty cycle */
+    T2CON= 0;             /* no pre-scalar,timer2 is off */
+    CCP1CON = 0x0C;        /* set PWM mode and no decimal value for PWM */
+    TMR2 = 0;
+    TMR2ON = 1;  /* Turn ON Timer2 */
+}
+
+
+void led_pwm_control()
+{
+    unsigned int duty_cycle;
+    
+    for(duty_cycle=1;duty_cycle<199;duty_cycle++)
+    {
+        CCPR1L = duty_cycle;   /* load duty cycle */
+        __delay_ms(20);
+    }
+    __delay_ms(250);
+
+    for(duty_cycle=199;duty_cycle>1;duty_cycle--)
+    {
+        CCPR1L = duty_cycle;   /* load duty cycle */
+        __delay_ms(20);
+    }
+    __delay_ms(250);
+}
+
 void init(){
     TRISBbits.RB0 = 0;
     TRISBbits.RB1 = 0;
@@ -145,25 +183,14 @@ void init(){
 }
 /* ****************** MAIN ****************** */
 void main(void){
-    unsigned int duty_cycle;  
-    char __1, // don't care
-         __2, 
-         __3,
-         temputure_val_dec,
-         checksum;
-
     OSCCON=0x72;         /* set internal clock to 8MHz */
-    TRISCbits.TRISC2=0;  /* Set CCP1 pin as output for PWM out */
-    PR2=199;             /* load period value in PR2 register */ 
-    CCPR1L=1;            /* load duty cycle */
-    T2CON=0;             /* no pre-scalar,timer2 is off */
-    TMR2=0;
-
     init();
-    T2CONbits.TMR2ON=1;  /* Turn ON Timer2 */
-
+    
+    led_pwm_init();
     blink_leds();
-    while (1);
+    while (1){
+        led_pwm_control();
+    }
 
 }
 
